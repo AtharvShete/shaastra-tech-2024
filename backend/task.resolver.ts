@@ -5,11 +5,11 @@ import { getConnection } from "typeorm";
 
 @Resolver()
 export class TaskResolver {
-  @Query(() => [Task])
-  async allTasks(): Promise<Task[]> {
+  @Query(() => [Task], { nullable: true })
+  async allTasks(): Promise<Task[] | null> {
     try {
       const tasks = await Task.find();
-      return tasks;
+      return tasks || [];
     } catch (error) {
       throw new ApolloError("Failed to fetch tasks", "FETCH_TASKS_ERROR", {
         error,
@@ -29,21 +29,32 @@ export class TaskResolver {
     }
   }
 
-  @Mutation(() => Task)
+  @Mutation(() => Task,{ nullable: true })
   async createTask(
     @Arg("title") title: string,
     @Arg("description", { nullable: true }) description: string
-  ): Promise<Task> {
+  ): Promise<Task | null> {
     try {
-      const newTask = Task.create({ title, description });
-      await newTask.save();
-      return newTask;
+      console.log(`Creating task with title: ${title} and description: ${description}`);
+      
+      const newTask = Task.create({title, description, completed: false});
+      newTask.title = title;
+      newTask.description = description;
+      const savedTask = await newTask.save();
+      console.log(`Task created with ID: ${savedTask.id}`);
+      
+      if (!savedTask) {
+        throw new ApolloError("Failed to save task", "SAVE_TASK_ERROR");
+      }
+      return savedTask;
     } catch (error) {
+      console.error('Error in createTask resolver:', error);
       throw new ApolloError("Failed to create task", "CREATE_TASK_ERROR", {
         error,
       });
     }
   }
+  
 
   @Mutation(() => Task, { nullable: true })
   async updateTask(

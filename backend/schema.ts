@@ -9,7 +9,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    allTasks: [Task!]!
+  allTasks: [Task!]!
     taskById(id: Int!): Task
     completedTasks: [Task!]!
     pendingTasks: [Task!]!
@@ -22,7 +22,7 @@ const typeDefs = gql`
       title: String
       description: String
       completed: Boolean
-    ): Task
+    ): Task!
     deleteTask(id: Int!): Boolean!
   }
 `;

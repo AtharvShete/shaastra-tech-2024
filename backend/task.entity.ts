@@ -1,16 +1,24 @@
-import { BaseEntity ,Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
 
 @Entity()
 export class Task extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id!: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ nullable: false })
-    title!: string;
+  @Column()
+  title: string;
 
-    @Column({ nullable: true })
-    description!: string;
+  @Column({ nullable: true })
+  description: string;
 
-    @Column({ default: false })
-    completed!: boolean;
+  @Column()
+  completed: boolean;
+
+  constructor() {
+    super();
+    this.id = 0; 
+    this.title = '';
+    this.description = '';
+    this.completed = false;
+  }
 }
