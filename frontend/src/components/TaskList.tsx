@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import React from "react";
+import { useQuery, gql } from "@apollo/client";
+import TaskForm from "./TaskForm";
+import './TaskList.css';
 
-// Define the GraphQL queries and mutations
 const GET_TASKS = gql`
   query allTasks {
     allTasks {
@@ -9,17 +10,6 @@ const GET_TASKS = gql`
       title
       description
       completed
-    }
-  }
-`;
-
-const CREATE_TASK = gql`
-    mutation createTask($title: String!, $description: String, $completed: Boolean!) {
-        createTask(title: $title, description: $description, completed: $completed) {
-            id
-            title
-            description
-            completed
     }
   }
 `;
@@ -32,76 +22,24 @@ interface Task {
 }
 
 const TaskList: React.FC = () => {
-  const { loading, error, data = { allTasks: [] } } = useQuery<{ allTasks: Task[] }>(GET_TASKS);
-  const [createTask] = useMutation(CREATE_TASK);
-
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    completed: false,
-  });
+  const { loading, error, data, refetch } = useQuery<{ allTasks: Task[] }>(GET_TASKS);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTask({ ...newTask, completed: e.target.checked });
-  };
-
-  const handleCreateTask = async () => {
-    try {
-      await createTask({
-        variables: {
-          title: newTask.title,
-          description: newTask.description,
-          completed: newTask.completed,
-        },
-        refetchQueries: [{ query: GET_TASKS }],
-      });
-      setNewTask({ title: "", description: "", completed: false });
-    } catch (error) {
-      console.error("Error creating task:", error);
-    }
-  };
-
   return (
-    <div>
-      <ul>
-        {data.allTasks.map((task) => (
-          <li key={task.id}>
-            {task.title} - {task.description} - {task.completed ? "Done" : "Pending"}
+    <div className="task-container">
+      <h1>Tasks</h1>
+      <TaskForm refetchTasks={refetch} />
+      <ul className="task-list">
+        {data?.allTasks.map((task) => (
+          <li key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
+            <h3>{task.title}</h3>
+            <p>{task.description}</p>
+            <p>Status: {task.completed ? "Done" : "Pending"}</p>
           </li>
         ))}
       </ul>
-      <div>
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={newTask.title}
-          onChange={handleInputChange}
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={newTask.description}
-          onChange={handleInputChange}
-        />
-        <label>
-          Completed:
-          <input
-            type="checkbox"
-            checked={newTask.completed}
-            onChange={handleCheckboxChange}
-          />
-        </label>
-        <button onClick={handleCreateTask}>Create Task</button>
-      </div>
     </div>
   );
 };

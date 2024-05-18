@@ -1,17 +1,33 @@
 {
-  "dependencies": {
-    "@apollo/client": "^3.10.3",
-    "@graphql-tools/utils": "^10.2.0",
-    "apollo-server": "^3.13.0",
-    "apollo-server-core": "^3.13.0",
-    "dotenv": "^16.4.5",
-    "graphql-tools": "^9.0.1",
-    "pg": "^8.11.5",
-    "react": "^18.3.1",
-    "type-graphql": "^2.0.0-rc.1",
-    "typeorm": "^0.3.20"
-  },
-  "scripts": {
-    "start": "nodemon --exec ts-node index.ts"
-  }
+   "name": "backend",
+   "version": "1.0.0",
+   "main": "index.js",
+   "scripts": {
+      "compile": "tsc",
+      "start": "npm run compile && node ./dist/index.js",
+      "typeorm": "typeorm-ts-node-commonjs"
+   },
+   "keywords": [],
+   "author": "",
+   "license": "ISC",
+   "description": "",
+   "type": "module",
+   "dependencies": {
+      "@apollo/client": "^3.10.4",
+      "@apollo/server": "^4.10.4",
+      "apollo-server-core": "^3.13.0",
+      "class-validator": "^0.14.1",
+      "graphql": "^16.8.1",
+      "pg": "^8.4.0",
+      "reflect-metadata": "^0.1.13",
+      "type-graphql": "^2.0.0-rc.1",
+      "typeorm": "^0.3.20"
+   },
+   "devDependencies": {
+      "@types/node": "^16.18.97",
+      "@types/react": "^18.3.2",
+      "ts-node": "^10.9.2",
+      "tslib": "^2.6.2",
+      "typescript": "^5.4.5"
+   }
 }

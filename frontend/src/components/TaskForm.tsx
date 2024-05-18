@@ -1,10 +1,10 @@
-import { gql, useMutation } from '@apollo/client';
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { gql, useMutation } from "@apollo/client";
+import './TaskForm.css';
 
-// Define your GraphQL mutation
 const CREATE_TASK = gql`
-  mutation CreateTask($title: String!, $description: String) {
-    createTask(title: $title, description: $description) {
+  mutation createTask($title: String!, $description: String, $completed: Boolean!) {
+    createTask(title: $title, description: $description, completed: $completed) {
       id
       title
       description
@@ -13,72 +13,77 @@ const CREATE_TASK = gql`
   }
 `;
 
-type CreateTaskMutationVariables = {
-  title: string;
-  description?: string;
-};
-
-type CreateTaskMutationResponse = {
-  createTask: Task;
-};
-
-interface Task {
-  id: number;
-  title: string;
-  description?: string;
-  completed: boolean;
+interface TaskFormProps {
+  refetchTasks: () => void;
 }
 
-export const TaskForm: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [formError, setFormError] = useState('');
+const TaskForm: React.FC<TaskFormProps> = ({ refetchTasks }) => {
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    completed: false,
+  });
 
-  const [createTask, { loading, error }] = useMutation<
-    CreateTaskMutationResponse,
-    CreateTaskMutationVariables
-  >(CREATE_TASK, {
+  const [createTask, { loading, error }] = useMutation(CREATE_TASK, {
     onCompleted: () => {
-      setTitle('');
-      setDescription('');
-      setFormError('');
+      setNewTask({ title: "", description: "", completed: false });
+      refetchTasks();
     },
     onError: (error) => {
-      setFormError(error.message);
+      console.error("Error creating task:", error);
     },
   });
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!title) {
-      setFormError('Title is required.');
-      return;
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewTask({ ...newTask, [name]: value });
+  };
 
-    try {
-      await createTask({ variables: { title, description } });
-    } catch (e) {
-      console.error(e);
-    }
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTask({ ...newTask, completed: e.target.checked });
+  };
+
+  const handleCreateTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    createTask({
+      variables: {
+        title: newTask.title,
+        description: newTask.description,
+        completed: newTask.completed,
+      },
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleCreateTask} className="task-form">
       <input
         type="text"
+        name="title"
         placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={newTask.title}
+        onChange={handleInputChange}
+        required
       />
-      <input
-        type="text"
+      <textarea
+        name="description"
         placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={newTask.description}
+        onChange={handleInputChange}
       />
-      <button type="submit" disabled={loading} >Add Task</button>
-      {loading && <p>Loading...</p>}
-      {formError && <p>Error: {formError}</p>}
+      <label>
+        Completed:
+        <input
+          type="checkbox"
+          checked={newTask.completed}
+          onChange={handleCheckboxChange}
+        />
+      </label>
+      <button type="submit" disabled={loading}>
+        {loading ? "Creating..." : "Create Task"}
+      </button>
+      {error && <p>Error: {error.message}</p>}
     </form>
   );
 };
+
+export default TaskForm;

@@ -1,16 +1,15 @@
-import { gql } from "@apollo/client";
-
-const typeDefs = gql`
+import { gql } from 'graphql-tag';
+const typeDefs = gql `
   type Task {
-    id: Int!
+    id: ID!
     title: String!
     description: String
     completed: Boolean!
   }
 
   type Query {
-  allTasks: [Task!]!
-    taskById(id: Int!): Task
+    allTasks: [Task!]!
+    taskById(id: ID!): Task
     completedTasks: [Task!]!
     pendingTasks: [Task!]!
   }
@@ -18,13 +17,12 @@ const typeDefs = gql`
   type Mutation {
     createTask(title: String!, description: String): Task!
     updateTask(
-      id: Int!
+      id: ID!
       title: String
       description: String
       completed: Boolean
     ): Task!
-    deleteTask(id: Int!): Boolean!
+    deleteTask(id: ID!): Boolean!
   }
 `;
-
 export default typeDefs;
